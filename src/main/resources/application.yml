@@ -1,0 +1,19 @@
+server:
+  port: 9010
+spring:
+  mvc:
+    static-path-pattern: /static/**
+  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    url: jdbc:p6spy:mysql://localhost:3306/eblog?useUnicode=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: toor
+  freemarker:
+    settings:
+      classic_compatible: true  #处理空值
+      datetime_format: yyyy-MM-dd HH:mm:ss
+      number_format: 0.##
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**Mapper.xml
