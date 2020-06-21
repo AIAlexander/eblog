@@ -1,5 +1,6 @@
 package com.alex.controller;
 
+import com.alex.vo.CommentVO;
 import com.alex.vo.PostVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,14 +21,10 @@ public class PostController extends BaseController{
     public String detail(@PathVariable(name = "id") Long id){
 
         Integer pageNum = ServletRequestUtils.getIntParameter(req, "pn", 1);
-        Integer size = ServletRequestUtils.getIntParameter(req, "size", 2);
-        Page page = new Page(pageNum, size);
-
-        //入参：分页信息，分类信息，用户信息，是否置顶，是否精选，是否排序
-        IPage result = postService.getPostByPage(page, null, null, null, null, "created");
 
         req.setAttribute("currentCategoryId", id);
-        req.setAttribute("pageData", result);
+        req.setAttribute("pn", pageNum);
+
         return "post/category";
     }
 
@@ -36,6 +33,13 @@ public class PostController extends BaseController{
 
         PostVO postVO = postService.getPostDetail(id);
         Assert.notNull(postVO, "文章已被删除");
+
+        //获取博客详情页面的评论列表(1分页，2文章id，3用户id，排序)
+        IPage<CommentVO> results = commentService.getComments(createPage(), postVO.getId(), null, "created");
+
+        req.setAttribute("post", postVO);
+        req.setAttribute("currentCategoryId", postVO.getCategoryId());
+        req.setAttribute("pageData", results);
         return "/post/detail";
     }
 }

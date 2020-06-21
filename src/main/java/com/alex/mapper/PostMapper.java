@@ -25,4 +25,6 @@ import java.util.List;
 public interface PostMapper extends BaseMapper<Post> {
 
     IPage<PostVO> selectPosts(Page page, @Param(Constants.WRAPPER) QueryWrapper wrapper);
+
+    PostVO selectOnePost(@Param(Constants.WRAPPER) QueryWrapper<Post> wrapper);
 }

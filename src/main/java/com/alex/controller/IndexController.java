@@ -16,12 +16,10 @@ public class IndexController extends BaseController{
 
     @RequestMapping({"","/","/index"})
     public String index(){
-        Integer pageNum = ServletRequestUtils.getIntParameter(req, "pn", 1);
-        Integer size = ServletRequestUtils.getIntParameter(req, "size", 2);
-        Page page = new Page(pageNum, size);
 
         //入参：分页信息，分类信息，用户信息，是否置顶，是否精选，是否排序
-        IPage result = postService.getPostByPage(page, null, null, null, null, "created");
+        IPage result = postService.getPostByPage(createPage(), null, null,
+                null, null, "created");
 
         req.setAttribute("pageData", result);
         req.setAttribute("currentCategoryId", 0);

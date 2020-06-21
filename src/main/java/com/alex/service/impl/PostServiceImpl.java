@@ -42,7 +42,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
     @Override
     public PostVO getPostDetail(Long id) {
-        QueryWrapper wrapper = new QueryWrapper<Post>().eq("id", id);
-        return null;
+        QueryWrapper<Post> wrapper = new QueryWrapper<Post>().eq("p.id", id);
+        return postMapper.selectOnePost(wrapper);
     }
 }

@@ -1,6 +1,9 @@
 package com.alex.service;
 
 import com.alex.entity.Comment;
+import com.alex.vo.CommentVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface CommentService extends IService<Comment> {
 
+    IPage<CommentVO> getComments(Page page, Long postId, Long userId, String order);
 }
