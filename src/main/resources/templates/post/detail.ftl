@@ -33,7 +33,7 @@
         </div>
         <div class="detail-about">
           <a class="fly-avatar" href="../user/${post.authorId}">
-            <img src="/static/${post.authorAvatar}" alt="${post.authorName}">
+            <img src="${post.authorAvatar}" alt="${post.authorName}">
           </a>
           <div class="fly-detail-user">
             <a href="../user/${post.authorId}" class="fly-link">
@@ -62,7 +62,7 @@
             <a name="item-${comment.id}"></a>
             <div class="detail-about detail-about-reply">
               <a class="fly-avatar" href="/user/${comment.authorId}">
-                <img src="/static/${comment.authorAvatar}" alt="${comment.authorName}">
+                <img src="${comment.authorAvatar}" alt="${comment.authorName}">
               </a>
               <div class="fly-detail-user">
                 <a href="" class="fly-link">

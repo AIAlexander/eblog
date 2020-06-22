@@ -1,8 +1,6 @@
 server:
   port: 9010
 spring:
-  mvc:
-    static-path-pattern: /static/**
   datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
     driver-class-name: com.p6spy.engine.spy.P6SpyDriver
