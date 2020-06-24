@@ -12,6 +12,9 @@ spring:
       classic_compatible: true  #处理空值
       datetime_format: yyyy-MM-dd HH:mm:ss
       number_format: 0.##
-
+  redis:
+    host: localhost
+    port: 6379
+    password:
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml

@@ -22,4 +22,6 @@ public interface PostService extends IService<Post> {
     IPage<PostVO> getPostByPage(Page page, Long categoryId, Long userId, Integer level, Boolean recommend, String order);
 
     PostVO getPostDetail(Long id);
+
+    void initWeekRank();
 }
