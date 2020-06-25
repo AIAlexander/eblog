@@ -90,6 +90,32 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
     }
 
     /**
+     * 添加评论时同步操作redis中的本周热议
+     * @param postId
+     * @param isIncrease
+     */
+    @Override
+    public void increaseCommentCountAndUnionForRank(long postId, boolean isIncrease) {
+        //添加redis中当天的评论数量
+        String key = "day:rank:" + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
+        redisUtil.zIncrementScore(key, postId, isIncrease ? 1 : -1);
+
+        //获取Post
+        Post post = this.getById(postId);
+
+        //设置过期时间
+        long between = DateUtil.between(new Date(), post.getCreated(), DateUnit.DAY);
+        long expireTime = (7 - between) * 24 * 60 * 60;
+
+        //缓存文章信息
+        cacheSavePostInfo(post, expireTime);
+
+        //同步更新week:rank
+        unionCommentLast7DaysForRank();
+
+    }
+
+    /**
      * 缓存文章基本信息
      * @param post
      * @param expireTime
