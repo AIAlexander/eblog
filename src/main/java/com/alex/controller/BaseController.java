@@ -2,6 +2,7 @@ package com.alex.controller;
 
 import com.alex.service.CommentService;
 import com.alex.service.PostService;
+import com.alex.service.UserService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestUtils;
@@ -21,6 +22,9 @@ public class BaseController {
 
     @Autowired
     public CommentService commentService;
+
+    @Autowired
+    public UserService userService;
 
     public Page createPage(){
         Integer pageNum = ServletRequestUtils.getIntParameter(req, "pn", 1);
