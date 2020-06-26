@@ -3,6 +3,7 @@ package com.alex.service.impl;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import com.alex.common.Constant;
 import com.alex.entity.Post;
 import com.alex.mapper.PostMapper;
 import com.alex.service.PostService;
@@ -12,6 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +72,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         //初始化文章的总评论量
         for (Post post : posts) {
             //key是day:rank:20200615
-            String key = "day:rank:" + DateUtil.format(post.getCreated(), DatePattern.PURE_DATE_FORMAT);
+            String key = Constant.DAY_RANK_KEY_PREFIX + DateUtil.format(post.getCreated(), DatePattern.PURE_DATE_FORMAT);
             /**
              * 本周热议榜的数据结构：
              *      day:rank:20200615  value: 1(postId) scored: 10(commentCount)
@@ -97,7 +99,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
     @Override
     public void increaseCommentCountAndUnionForRank(long postId, boolean isIncrease) {
         //添加redis中当天的评论数量
-        String key = "day:rank:" + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
+        String key = Constant.DAY_RANK_KEY_PREFIX + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
         redisUtil.zIncrementScore(key, postId, isIncrease ? 1 : -1);
 
         //获取Post
@@ -115,18 +117,34 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
     }
 
+    @Override
+    public void putViewCount(PostVO postVO) {
+        String key = Constant.RANK_POST_KEY_PREFIX + postVO.getId();
+        //1 从缓存中获取阅读量
+        Integer viewCount = (Integer) redisUtil.hget(key, "post:viewCount");
+        //2 如果没有，从postVo中获取，再加一
+        if(viewCount != null){
+            postVO.setViewCount(viewCount + 1);
+        }else{
+            postVO.setViewCount(postVO.getViewCount() + 1);
+        }
+        //3 同步缓存
+        redisUtil.hset(key, "post:viewCount", postVO.getViewCount());
+    }
+
     /**
      * 缓存文章基本信息
      * @param post
      * @param expireTime
      */
     private void cacheSavePostInfo(Post post, long expireTime) {
-        String key = "rank:post:" + post.getId();
+        String key = Constant.RANK_POST_KEY_PREFIX + post.getId();
         boolean hasKey = redisUtil.hasKey(key);
         if(!hasKey){
             redisUtil.hset(key, "post:id", post.getId(), expireTime);
             redisUtil.hset(key, "post:title", post.getTitle(), expireTime);
             redisUtil.hset(key, "post:commentCount", post.getCommentCount(), expireTime);
+            redisUtil.hset(key, "post:viewCount", post.getViewCount(), expireTime);
         }
     }
 
@@ -134,14 +152,13 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
      * 文章每日评论并集，合并评论数量
      */
     private void unionCommentLast7DaysForRank() {
-        String destKey = "week:rank";
-        String key = "day:rank:" + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
+        String key = Constant.RANK_POST_KEY_PREFIX + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
         List<String> otherKeys = new ArrayList<>();
         for (int i = -6; i < 0; i++){
-            String otherKey = "day:rank:" +
+            String otherKey = Constant.DAY_RANK_KEY_PREFIX +
                     DateUtil.format(DateUtil.offsetDay(new Date(), i), DatePattern.PURE_DATE_FORMAT);
             otherKeys.add(otherKey);
         }
-        redisUtil.zUnionAndStore(key, otherKeys, destKey);
+        redisUtil.zUnionAndStore(key, otherKeys, Constant.WEEK_RANK_KEY);
     }
 }

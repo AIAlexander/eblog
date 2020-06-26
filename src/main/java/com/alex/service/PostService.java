@@ -26,4 +26,6 @@ public interface PostService extends IService<Post> {
     void initWeekRank();
 
     void increaseCommentCountAndUnionForRank(long postId, boolean isIncrease);
+
+    void putViewCount(PostVO postVO);
 }

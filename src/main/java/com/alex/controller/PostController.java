@@ -34,6 +34,8 @@ public class PostController extends BaseController{
         PostVO postVO = postService.getPostDetail(id);
         Assert.notNull(postVO, "文章已被删除");
 
+        postService.putViewCount(postVO);
+
         //获取博客详情页面的评论列表(1分页，2文章id，3用户id，排序)
         IPage<CommentVO> results = commentService.getComments(createPage(), postVO.getId(), null, "created");
 
