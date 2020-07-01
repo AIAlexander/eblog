@@ -1,14 +1,19 @@
 package com.alex.controller;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import com.alex.common.Constant;
 import com.alex.common.Result;
 import com.alex.util.ValidationUtil;
 import com.alex.vo.UserVO;
 import com.google.code.kaptcha.Producer;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.imageio.ImageIO;
@@ -69,8 +74,37 @@ public class AuthController extends BaseController{
         }
 
         //完成注册
+        Result result = userService.register(userVO);
 
+        return result.action("/login");
+    }
 
-        return Result.success("注册成功", null).action("/login");
+    @PostMapping("/login")
+    @ResponseBody
+    public Result doLogin(UserVO userVO){
+        if(StrUtil.isEmpty(userVO.getEmail()) || StrUtil.isEmpty(userVO.getPassword())){
+            return Result.fail("邮箱或者密码不能为空!");
+        }
+        UsernamePasswordToken token = new UsernamePasswordToken(userVO.getEmail(), SecureUtil.md5(userVO.getPassword()));
+        try{
+            SecurityUtils.getSubject().login(token);
+        } catch (AuthenticationException e){
+            if(e instanceof UnknownAccountException){
+                return Result.fail("用户不存在");
+            } else if(e instanceof LockedAccountException){
+                return Result.fail("用户被禁用");
+            } else if(e instanceof IncorrectCredentialsException){
+                return Result.fail("密码错误");
+            } else{
+                return Result.fail("用户认证失败");
+            }
+        }
+        return Result.success().action("/");
+    }
+
+    @RequestMapping("/user/logout")
+    public String logout(){
+        SecurityUtils.getSubject().logout();
+        return "redirect:/";
     }
 }

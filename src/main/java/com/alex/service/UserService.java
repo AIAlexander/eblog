@@ -1,6 +1,9 @@
 package com.alex.service;
 
+import com.alex.common.Result;
 import com.alex.entity.User;
+import com.alex.shiro.AccountProfile;
+import com.alex.vo.UserVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -13,4 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserService extends IService<User> {
 
+    Result register(UserVO userVO);
+
+    AccountProfile login(String email, String password);
 }

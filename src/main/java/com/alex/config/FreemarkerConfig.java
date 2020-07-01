@@ -3,6 +3,7 @@ package com.alex.config;
 import com.alex.template.PostsTemplate;
 import com.alex.template.TimeTemplate;
 import com.alex.template.WeekRankTemplate;
+import com.jagregory.shiro.freemarker.ShiroTags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,5 +33,6 @@ public class FreemarkerConfig {
         configuration.setSharedVariable("time", new TimeTemplate());
         configuration.setSharedVariable(postsTemplate.getName(), postsTemplate);
         configuration.setSharedVariable(weekRankTemplate.getName(), weekRankTemplate);
+        configuration.setSharedVariable("shiro", new ShiroTags());
     }
 }
