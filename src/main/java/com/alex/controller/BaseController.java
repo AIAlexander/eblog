@@ -3,7 +3,9 @@ package com.alex.controller;
 import com.alex.service.CommentService;
 import com.alex.service.PostService;
 import com.alex.service.UserService;
+import com.alex.shiro.AccountProfile;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestUtils;
 
@@ -30,5 +32,13 @@ public class BaseController {
         Integer pageNum = ServletRequestUtils.getIntParameter(req, "pn", 1);
         Integer size = ServletRequestUtils.getIntParameter(req, "size", 2);
         return new Page(pageNum, size);
+    }
+
+    protected AccountProfile getAccountProfile(){
+        return (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+    }
+
+    protected Long getProfileId(){
+        return  getAccountProfile().getId();
     }
 }

@@ -22,4 +22,7 @@ public class UserVO {
     private String password;
     private String repass;
     private String vercode;
+    private String gender;
+    private String sign;
+    private String avatar;
 }

@@ -175,7 +175,7 @@ layui.define(['laypage', 'fly', 'element', 'flow'], function(exports){
         ,done: function(res){
           if(res.status == 0){
             $.post('/user/set/', {
-              avatar: res.url
+              avatar: res.data
             }, function(res){
               location.reload();
             });

@@ -45,6 +45,9 @@ public class ShiroConfig {
 
         Map<String, String> hashMap = new LinkedHashMap<>();
         hashMap.put("/login", "anon");
+        hashMap.put("/user/home", "authc");
+        hashMap.put("/user/set", "authc");
+        hashMap.put("/user/upload", "authc");
         factoryBean.setFilterChainDefinitionMap(hashMap);
 
         return factoryBean;
