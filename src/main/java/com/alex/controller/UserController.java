@@ -7,12 +7,16 @@ import com.alex.entity.Post;
 import com.alex.entity.User;
 import com.alex.shiro.AccountProfile;
 import com.alex.util.UploadUtil;
+import com.alex.vo.UserMessageVO;
 import com.alex.vo.UserVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -64,16 +68,6 @@ public class UserController extends BaseController {
 
 //        req.setAttribute("user", user);
         return "user/index";
-    }
-
-    @GetMapping("/user/message")
-    public String message(){
-
-        //从shiro中获取登录的用户信息
-//        User user = userService.getById(getProfileId());
-
-//        req.setAttribute("user", user);
-        return "user/message";
     }
 
     //设置基本信息与设置头像并用接口
@@ -146,5 +140,15 @@ public class UserController extends BaseController {
     public Result collection(){
         IPage page = postService.getCollectionPagesByUserId(createPage(), getProfileId());
         return Result.success(page);
+    }
+
+    @GetMapping("/user/message")
+    public String message(){
+
+        IPage<UserMessageVO> page = userMessageService.getMessagePageByToUserId(createPage(), getProfileId());
+
+        req.setAttribute("pageData", page);
+
+        return "user/message";
     }
 }

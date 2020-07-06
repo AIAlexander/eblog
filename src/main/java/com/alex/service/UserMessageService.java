@@ -1,7 +1,11 @@
 package com.alex.service;
 
 import com.alex.entity.UserMessage;
+import com.alex.vo.UserMessageVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+
 
 /**
  * <p>
@@ -12,5 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2020-06-15
  */
 public interface UserMessageService extends IService<UserMessage> {
+
+    IPage<UserMessageVO> getMessagePageByToUserId(Page page, Long userId);
 
 }

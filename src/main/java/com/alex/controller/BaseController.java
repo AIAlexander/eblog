@@ -2,6 +2,7 @@ package com.alex.controller;
 
 import com.alex.service.CommentService;
 import com.alex.service.PostService;
+import com.alex.service.UserMessageService;
 import com.alex.service.UserService;
 import com.alex.shiro.AccountProfile;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -27,6 +28,9 @@ public class BaseController {
 
     @Autowired
     public UserService userService;
+
+    @Autowired
+    public UserMessageService userMessageService;
 
     public Page createPage(){
         Integer pageNum = ServletRequestUtils.getIntParameter(req, "pn", 1);

@@ -1,6 +1,5 @@
 package com.alex.entity;
 
-import com.alex.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -43,9 +42,12 @@ public class UserMessage extends BaseEntity {
     private String content;
 
     /**
-     * 消息类型
+     * 消息类型 0:系统消息 1:评论文章 2:评论评论
      */
     private Integer type;
+
+
+    private Integer status;
 
 
 }
