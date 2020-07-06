@@ -132,6 +132,12 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         redisUtil.hset(key, "post:viewCount", postVO.getViewCount());
     }
 
+    @Override
+    public IPage<PostVO> getCollectionPagesByUserId(Page page, Long userId) {
+        return this.page(page, new QueryWrapper<Post>()
+                .inSql("id", "select post_id from user_collection where user_id = " + userId));
+    }
+
     /**
      * 缓存文章基本信息
      * @param post
@@ -154,7 +160,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
     private void unionCommentLast7DaysForRank() {
         String key = Constant.RANK_POST_KEY_PREFIX + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
         List<String> otherKeys = new ArrayList<>();
-        for (int i = -6; i < 0; i++){
+        for (int i = -6; i <= 0; i++){
             String otherKey = Constant.DAY_RANK_KEY_PREFIX +
                     DateUtil.format(DateUtil.offsetDay(new Date(), i), DatePattern.PURE_DATE_FORMAT);
             otherKeys.add(otherKey);

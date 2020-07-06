@@ -2,32 +2,7 @@
 
 <@layout "基本设置">
     <div class="layui-container fly-marginTop fly-user-main">
-        <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="user">
-            <li class="layui-nav-item">
-                <a href="/user/home">
-                    <i class="layui-icon">&#xe609;</i>
-                    我的主页
-                </a>
-            </li>
-            <li class="layui-nav-item">
-                <a href="index.html">
-                    <i class="layui-icon">&#xe612;</i>
-                    用户中心
-                </a>
-            </li>
-            <li class="layui-nav-item layui-this">
-                <a href="set.html">
-                    <i class="layui-icon">&#xe620;</i>
-                    基本设置
-                </a>
-            </li>
-            <li class="layui-nav-item">
-                <a href="message.html">
-                    <i class="layui-icon">&#xe611;</i>
-                    我的消息
-                </a>
-            </li>
-        </ul>
+        <@userLeft level = 2></@userLeft>
 
         <div class="site-tree-mobile layui-hide">
             <i class="layui-icon">&#xe602;</i>

@@ -56,9 +56,6 @@
                         <#else>
                             <div class="fly-none" style="min-height: 50px; padding:30px 0; height:auto;"><i style="font-size:14px;">30天内没有发表博客</i></div>
                         </#if>
-
-
-
                     </ul>
                 </div>
             </div>

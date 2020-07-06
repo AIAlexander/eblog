@@ -28,4 +28,6 @@ public interface PostService extends IService<Post> {
     void increaseCommentCountAndUnionForRank(long postId, boolean isIncrease);
 
     void putViewCount(PostVO postVO);
+
+    IPage<PostVO> getCollectionPagesByUserId(Page page, Long userIf);
 }
