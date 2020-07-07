@@ -151,4 +151,14 @@ public class UserController extends BaseController {
 
         return "user/message";
     }
+
+    @PostMapping("/message/remove")
+    @ResponseBody
+    public Result removeMessage(Long id, @RequestParam(defaultValue = "false") Boolean all){
+
+        Boolean res = userMessageService.removeMessageById(id, getProfileId(), all);
+
+        return res ? Result.success() : Result.fail("删除失败");
+    }
+
 }

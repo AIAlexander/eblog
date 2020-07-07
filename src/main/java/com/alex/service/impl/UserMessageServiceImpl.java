@@ -33,4 +33,12 @@ public class UserMessageServiceImpl extends ServiceImpl<UserMessageMapper, UserM
                 .orderByAsc("created");
         return userMessageMapper.getMessagePageByToUserId(page, wrapper);
     }
+
+    @Override
+    public Boolean removeMessageById(Long id, Long userId, Boolean all) {
+        return this.remove(new QueryWrapper<UserMessage>()
+                .eq("to_user_id", userId)
+                .eq(!all, "id", id)
+        );
+    }
 }

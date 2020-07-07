@@ -19,4 +19,6 @@ public interface UserMessageService extends IService<UserMessage> {
 
     IPage<UserMessageVO> getMessagePageByToUserId(Page page, Long userId);
 
+
+    Boolean removeMessageById(Long id, Long userId, Boolean all);
 }
