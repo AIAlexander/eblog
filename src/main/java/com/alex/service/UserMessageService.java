@@ -21,4 +21,6 @@ public interface UserMessageService extends IService<UserMessage> {
 
 
     Boolean removeMessageById(Long id, Long userId, Boolean all);
+
+    Integer getNonReadMessageNumByUserId(Long profileId);
 }

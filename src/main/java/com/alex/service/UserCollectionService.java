@@ -13,4 +13,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserCollectionService extends IService<UserCollection> {
 
+    Integer getCollectionNumByPostId(Long userId, Long pid);
+
+    Boolean addCollection(Long userId, Long pid);
+
+    Boolean removeCollection(Long userId, Long pid);
 }

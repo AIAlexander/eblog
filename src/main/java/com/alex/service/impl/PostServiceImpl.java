@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -136,6 +135,13 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
     public IPage<PostVO> getCollectionPagesByUserId(Page page, Long userId) {
         return this.page(page, new QueryWrapper<Post>()
                 .inSql("id", "select post_id from user_collection where user_id = " + userId));
+    }
+
+    @Override
+    public int getPostNumByPostId(Long postId) {
+        return this.count(new QueryWrapper<Post>()
+                .eq("id", postId)
+        );
     }
 
     /**

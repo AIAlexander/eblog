@@ -1,6 +1,7 @@
 package com.alex.controller;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alex.common.Result;
 import com.alex.entity.Post;
@@ -11,6 +12,7 @@ import com.alex.vo.UserMessageVO;
 import com.alex.vo.UserVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wsh
@@ -83,6 +86,9 @@ public class UserController extends BaseController {
             AccountProfile profile = getAccountProfile();
             profile.setAvatar(userVO.getAvatar());
 
+            //同步更新缓存中的用户数据
+            SecurityUtils.getSubject().getSession().setAttribute("profile", profile);
+
             return Result.success().action("/user/set#avatar");
         }
 
@@ -102,6 +108,8 @@ public class UserController extends BaseController {
         AccountProfile profile = getAccountProfile();
         profile.setUsername(userVO.getUsername());
         profile.setSign(userVO.getSign());
+        //同步更新缓存中的用户数据
+        SecurityUtils.getSubject().getSession().setAttribute("profile", profile);
 
         return Result.success().action("/user/set#info");
     }
@@ -159,6 +167,13 @@ public class UserController extends BaseController {
         Boolean res = userMessageService.removeMessageById(id, getProfileId(), all);
 
         return res ? Result.success() : Result.fail("删除失败");
+    }
+
+    @ResponseBody
+    @PostMapping("/message/nums")
+    public Map getMessageNum(){
+        Integer messageNum = userMessageService.getNonReadMessageNumByUserId(getProfileId());
+        return MapUtil.builder("status", 0).put("count", messageNum).build();
     }
 
 }

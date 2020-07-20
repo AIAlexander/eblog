@@ -41,4 +41,12 @@ public class UserMessageServiceImpl extends ServiceImpl<UserMessageMapper, UserM
                 .eq(!all, "id", id)
         );
     }
+
+    @Override
+    public Integer getNonReadMessageNumByUserId(Long profileId) {
+        return this.count(new QueryWrapper<UserMessage>()
+                .eq("to_user_id", profileId)
+                .eq("status", "0")
+        );
+    }
 }

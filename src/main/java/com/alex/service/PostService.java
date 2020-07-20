@@ -6,9 +6,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-
-import java.util.List;
-
 /**
  * <p>
  *  服务类
@@ -30,4 +27,6 @@ public interface PostService extends IService<Post> {
     void putViewCount(PostVO postVO);
 
     IPage<PostVO> getCollectionPagesByUserId(Page page, Long userIf);
+
+    int getPostNumByPostId(Long postId);
 }
