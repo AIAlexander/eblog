@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Validation;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -46,12 +45,12 @@ public class AuthController extends BaseController{
         ImageIO.write(image, "jpg", outputStream);
     }
 
-    @GetMapping("/login")
+    @GetMapping(value = "**/login")
     public String login(){
         return "/auth/login";
     }
 
-    @GetMapping("/register")
+    @GetMapping(value = "**/register")
     public String register(){
         return "/auth/reg";
     }

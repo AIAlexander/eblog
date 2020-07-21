@@ -32,7 +32,7 @@
               <script id="tpl-post" type="text/html">
               <li>
                 <a class="jie-title" href="/post/{{d.id}}" target="_blank">{{d.title}}</a>
-                <i>{{layui.util.toDateString(d.create, 'yyyy-MM-dd HH:mm:ss')}}</i>
+                <i>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</i>
                 <a class="mine-edit" href="/post/edit?id={{post.id}}">编辑</a>
                 <em>{{d.viewCount}}阅/{{d.commentCount}}答</em>
               </li>

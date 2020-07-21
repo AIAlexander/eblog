@@ -29,4 +29,8 @@ public interface PostService extends IService<Post> {
     IPage<PostVO> getCollectionPagesByUserId(Page page, Long userIf);
 
     int getPostNumByPostId(Long postId);
+
+    Long submitPost(PostVO postVO, Long userId);
+
+    Boolean deletePost(Long postId);
 }

@@ -32,6 +32,9 @@ public class BaseController {
     @Autowired
     public UserCollectionService collectionService;
 
+    @Autowired
+    public CategoryService categoryService;
+
     public Page createPage(){
         Integer pageNum = ServletRequestUtils.getIntParameter(req, "pn", 1);
         Integer size = ServletRequestUtils.getIntParameter(req, "size", 2);

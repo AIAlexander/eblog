@@ -2,11 +2,14 @@ package com.alex.controller;
 
 import cn.hutool.core.map.MapUtil;
 import com.alex.common.Result;
+import com.alex.entity.Post;
+import com.alex.util.ValidationUtil;
 import com.alex.vo.CommentVO;
 import com.alex.vo.PostVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +49,42 @@ public class PostController extends BaseController{
         req.setAttribute("currentCategoryId", postVO.getCategoryId());
         req.setAttribute("pageData", results);
         return "/post/detail";
+    }
+
+    @GetMapping("/post/edit")
+    public String edit(){
+        String id = req.getParameter("id");
+        if(!StringUtils.isEmpty(id)){
+            Post post = postService.getById(id);
+            Assert.isTrue(post != null, "该帖子已被删除");
+            Assert.isTrue(Long.compare(getProfileId(), post.getUserId()) == 0 , "没有权限操作此文章");
+            req.setAttribute("post", post);
+        }
+        req.setAttribute("categories", categoryService.list());
+        return "/post/edit";
+    }
+
+    @PostMapping("/post/submit")
+    @ResponseBody
+    public Result submit(PostVO postVO){
+        ValidationUtil.ValidResult validResult = ValidationUtil.validateBean(postVO);
+        if(validResult.hasErrors()){
+            return Result.fail(validResult.getErrors());
+        }
+        Long postId = postService.submitPost(postVO, getProfileId());
+
+        return Result.success().action("/post/" + postId);
+    }
+
+    @PostMapping("/post/delete")
+    @ResponseBody
+    public Result deletePost(Long id){
+        Boolean flag = postService.deletePost(id);
+        if(flag){
+            return Result.success();
+        }else{
+            return Result.fail("删除失败");
+        }
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.alex.config;
 
+import cn.hutool.core.map.MapUtil;
 import com.alex.shiro.AccountRealm;
+import com.alex.shiro.AuthFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -43,13 +45,33 @@ public class ShiroConfig {
         //配置未授权跳转页面
         factoryBean.setUnauthorizedUrl("/error/403");
 
+        //加入自定义的登录过滤器
+        factoryBean.setFilters(MapUtil.of("auth", authFilter()));
+
         Map<String, String> hashMap = new LinkedHashMap<>();
-        hashMap.put("/login", "anon");
-        hashMap.put("/user/home", "authc");
-        hashMap.put("/user/set", "authc");
-        hashMap.put("/user/upload", "authc");
+        hashMap.put("/**", "anon");
+
+        //登录的用户才能够进行操作
+        hashMap.put("/user/home", "auth");
+        hashMap.put("/user/set", "auth");
+        hashMap.put("/user/upload", "auth");
+        hashMap.put("/post/edit", "auth");
+
+        hashMap.put("/collection/remove/", "auth");
+        hashMap.put("/collection/add/", "auth");
+        hashMap.put("/collection/find/", "auth");
+
         factoryBean.setFilterChainDefinitionMap(hashMap);
 
         return factoryBean;
+    }
+
+    /**
+     * 注入过滤器
+     * @return
+     */
+    @Bean
+    public AuthFilter authFilter(){
+        return new AuthFilter();
     }
 }

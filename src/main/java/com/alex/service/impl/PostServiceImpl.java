@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -142,6 +143,55 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         return this.count(new QueryWrapper<Post>()
                 .eq("id", postId)
         );
+    }
+
+    @Override
+    @Transactional
+    public Long submitPost(PostVO postVO, Long userId) {
+        if(postVO == null){
+            throw new RuntimeException("提交的博客信息不能为空！");
+        }
+        Long id = postVO.getId();
+        Post post = new Post();
+        if(id == null){
+            //新增
+            post.setTitle(postVO.getTitle());
+            post.setContent(postVO.getContent());
+            post.setEditMode("0");
+            post.setCategoryId(postVO.getCategoryId());
+            post.setUserId(userId);
+            post.setVoteUp(0);
+            post.setVoteDown(0);
+            post.setViewCount(0);
+            post.setCommentCount(0);
+            post.setRecommend(false);
+            post.setLevel(0);
+            post.setCreated(new Date());
+            post.setModified(new Date());
+            this.save(post);
+        }else{
+            //修改
+            post = this.getById(postVO.getId());
+            post.setCategoryId(postVO.getCategoryId());
+            post.setTitle(postVO.getTitle());
+            post.setContent(postVO.getContent());
+            post.setModified(new Date());
+            this.updateById(post);
+        }
+        return post.getId();
+    }
+
+    @Override
+    @Transactional
+    public Boolean deletePost(Long postId) {
+        if(postId == null){
+            return false;
+        }
+        Post post = this.getById(postId);
+        if(post == null){
+            return false;
+        }
+        return this.removeById(postId);
     }
 
     /**
