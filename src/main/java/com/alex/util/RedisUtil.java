@@ -617,4 +617,19 @@ public class RedisUtil {
         return redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
     }
 
+    /**
+     * 判断有序集合中是否包含value（自定义）
+     * @param key
+     * @param value
+     * @return
+     */
+    public Boolean zHasValue(String key, Object value){
+        Set<ZSetOperations.TypedTuple> set = getZSetRank(key, 0, -1);
+        for (ZSetOperations.TypedTuple tuple : set) {
+            if(tuple.equals(value)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -32,5 +32,17 @@ public interface PostService extends IService<Post> {
 
     Long submitPost(PostVO postVO, Long userId);
 
-    Boolean deletePost(Long postId);
+    Boolean deletePost(Long postId, Long userId);
+
+    //文章的置顶或者取消置顶
+    void updatePostRecommend(Long postId, Integer rank);
+
+    //文章的加精或取消加精
+    void updatePostLevel(Long postId, Integer rank);
+
+    //添加文章的评论
+    void addComment(Long postId, String content, Long userId);
+
+    //点赞评论
+    Boolean increasePostCommentLike(Long id, Boolean ok);
 }

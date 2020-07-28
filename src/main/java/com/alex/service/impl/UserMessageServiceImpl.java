@@ -49,4 +49,10 @@ public class UserMessageServiceImpl extends ServiceImpl<UserMessageMapper, UserM
                 .eq("status", "0")
         );
     }
+
+    @Override
+    public Boolean removeAllMessageByPostId(Long postId) {
+        return  this.remove(new QueryWrapper<UserMessage>()
+                .eq("post_id", postId));
+    }
 }

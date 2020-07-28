@@ -79,13 +79,39 @@ public class PostController extends BaseController{
     @PostMapping("/post/delete")
     @ResponseBody
     public Result deletePost(Long id){
-        Boolean flag = postService.deletePost(id);
+        Long userId = getProfileId();
+        Boolean flag = postService.deletePost(id, userId);
+
         if(flag){
             return Result.success();
         }else{
             return Result.fail("删除失败");
         }
     }
+
+    @PostMapping("/post/reply")
+    @ResponseBody
+    public Result reply(Long postId, String content){
+        Assert.notNull(postId, "找不到对应的文章!");
+        Assert.hasLength(content, "评论的内容不能为空！");
+        Long userId = getProfileId();
+        postService.addComment(postId, content, userId);
+
+        return Result.success().action("/post/" + postId);
+    }
+
+    @PostMapping("/post/like")
+    @ResponseBody
+    public Result like(Long id, Boolean ok){
+
+        Boolean flag = postService.increasePostCommentLike(id, ok);
+        if (flag){
+            return Result.success();
+        }else{
+            return Result.fail("点赞失败！");
+        }
+    }
+
 
     /**
      * 判断用户是否收藏文章

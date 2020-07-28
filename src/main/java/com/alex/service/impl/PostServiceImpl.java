@@ -3,10 +3,15 @@ package com.alex.service.impl;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import com.alex.common.Constant;
+import com.alex.entity.Comment;
 import com.alex.entity.Post;
 import com.alex.mapper.PostMapper;
+import com.alex.service.CommentService;
 import com.alex.service.PostService;
+import com.alex.service.UserCollectionService;
+import com.alex.service.UserMessageService;
 import com.alex.util.RedisUtil;
 import com.alex.vo.PostVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -37,6 +42,15 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private UserCollectionService userCollectionService;
+
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private UserMessageService userMessageService;
 
     @Override
     public IPage<PostVO> getPostByPage(Page page, Long categoryId, Long userId, Integer level, Boolean recommend, String order) {
@@ -98,23 +112,24 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
      */
     @Override
     public void increaseCommentCountAndUnionForRank(long postId, boolean isIncrease) {
-        //添加redis中当天的评论数量
-        String key = Constant.DAY_RANK_KEY_PREFIX + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
-        redisUtil.zIncrementScore(key, postId, isIncrease ? 1 : -1);
+        if(redisUtil.zHasValue(Constant.WEEK_RANK_KEY, postId)){
+            //添加redis中当天的评论数量
+            String key = Constant.DAY_RANK_KEY_PREFIX + DateUtil.format(new Date(), DatePattern.PURE_DATE_FORMAT);
+            redisUtil.zIncrementScore(key, postId, isIncrease ? 1 : -1);
 
-        //获取Post
-        Post post = this.getById(postId);
+            //获取Post
+            Post post = this.getById(postId);
 
-        //设置过期时间
-        long between = DateUtil.between(new Date(), post.getCreated(), DateUnit.DAY);
-        long expireTime = (7 - between) * 24 * 60 * 60;
+            //设置过期时间
+            long between = DateUtil.between(new Date(), post.getCreated(), DateUnit.DAY);
+            long expireTime = (7 - between) * 24 * 60 * 60;
 
-        //缓存文章信息
-        cacheSavePostInfo(post, expireTime);
+            //缓存文章信息
+            cacheSavePostInfo(post, expireTime);
 
-        //同步更新week:rank
-        unionCommentLast7DaysForRank();
-
+            //同步更新week:rank
+            unionCommentLast7DaysForRank();
+        }
     }
 
     @Override
@@ -183,7 +198,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
     @Override
     @Transactional
-    public Boolean deletePost(Long postId) {
+    public Boolean deletePost(Long postId, Long userId) {
         if(postId == null){
             return false;
         }
@@ -191,7 +206,89 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         if(post == null){
             return false;
         }
+        if(userId.compareTo(post.getUserId()) != 0 && userId.compareTo(1L) != 0){
+            return false;
+        }
+        Long authorId = post.getUserId();
+        //删除收藏的文章
+        userCollectionService.removeCollection(authorId, postId);
+        //删除文章的评论
+        commentService.removeByMap(MapUtil.of("post_id", postId));
+        //删除用户的消息
+        userMessageService.removeAllMessageByPostId(postId);
         return this.removeById(postId);
+    }
+
+    @Override
+    @Transactional
+    public void updatePostRecommend(Long postId, Integer rank) {
+        if(postId == null){
+            throw new RuntimeException("文章错误!");
+        }
+        Post post = this.getById(postId);
+        if (post == null){
+            throw new RuntimeException("文章已被删除！");
+        }
+        if(Integer.compare(rank, 0) == 0){
+            post.setRecommend(false);
+        }else{
+            post.setRecommend(true);
+        }
+        post.setModified(new Date());
+        this.updateById(post);
+    }
+
+    @Override
+    public void updatePostLevel(Long postId, Integer rank) {
+        if(postId == null){
+            throw new RuntimeException("文章错误!");
+        }
+        Post post = this.getById(postId);
+        if (post == null){
+            throw new RuntimeException("文章已被删除！");
+        }
+        post.setLevel(rank);
+        post.setModified(new Date());
+        this.updateById(post);
+    }
+
+    @Override
+    @Transactional
+    public void addComment(Long postId, String content, Long userId) {
+        Post post = this.getById(postId);
+        if(post == null){
+            throw new RuntimeException("文章已被删除!");
+        }
+        Comment comment = new Comment();
+        comment.setPostId(postId);
+        comment.setContent(content);
+        comment.setLevel(0);
+        comment.setUserId(userId);
+        comment.setVoteDown(0);
+        comment.setVoteUp(0);
+        comment.setCreated(new Date());
+        comment.setModified(new Date());
+        commentService.save(comment);
+
+        //文章的评论数加1
+        post.setCommentCount(post.getCommentCount() + 1);
+        this.updateById(post);
+
+        //本周热议板块的评论的更新
+        this.increaseCommentCountAndUnionForRank(postId, true);
+    }
+
+    @Override
+    public Boolean increasePostCommentLike(Long id, Boolean ok) {
+        if(id == null || ok == null){
+            return false;
+        }
+        Comment comment = commentService.getById(id);
+        if(ok){
+            comment.setVoteUp(comment.getVoteUp() + 1);
+        }
+        commentService.save(comment);
+        return true;
     }
 
     /**

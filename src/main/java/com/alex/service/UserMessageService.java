@@ -23,4 +23,7 @@ public interface UserMessageService extends IService<UserMessage> {
     Boolean removeMessageById(Long id, Long userId, Boolean all);
 
     Integer getNonReadMessageNumByUserId(Long profileId);
+
+    //根据postId删除所有的评论
+    Boolean removeAllMessageByPostId(Long postId);
 }
