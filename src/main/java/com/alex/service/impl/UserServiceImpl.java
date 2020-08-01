@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,5 +110,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPassword(SecureUtil.md5(pass));
         this.updateById(user);
         return Result.success().action("/user/set#pass");
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        return this.getOne(new QueryWrapper<User>()
+                .eq("username", username));
     }
 }

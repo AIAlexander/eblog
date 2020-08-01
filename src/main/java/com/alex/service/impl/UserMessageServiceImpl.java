@@ -1,5 +1,6 @@
 package com.alex.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.alex.entity.UserMessage;
 import com.alex.mapper.UserMessageMapper;
 import com.alex.service.UserMessageService;
@@ -10,6 +11,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -30,8 +34,19 @@ public class UserMessageServiceImpl extends ServiceImpl<UserMessageMapper, UserM
     public IPage<UserMessageVO> getMessagePageByToUserId(Page page, Long userId) {
         QueryWrapper<UserMessage> wrapper = new QueryWrapper<>();
         wrapper.eq("to_user_id", userId)
-                .orderByAsc("created");
-        return userMessageMapper.getMessagePageByToUserId(page, wrapper);
+                .orderByDesc("created");
+        IPage<UserMessageVO> userMessageVOPage = userMessageMapper.getMessagePageByToUserId(page, wrapper);
+
+        //将消息批量改成已读状态
+        List<Long> ids = new ArrayList<>();
+        for (UserMessageVO userMessageVO : userMessageVOPage.getRecords()){
+            if(userMessageVO.getStatus() == 0){
+                ids.add(userMessageVO.getId());
+            }
+        }
+        updateMessageStatusByIds(ids);
+
+        return userMessageVOPage;
     }
 
     @Override
@@ -54,5 +69,14 @@ public class UserMessageServiceImpl extends ServiceImpl<UserMessageMapper, UserM
     public Boolean removeAllMessageByPostId(Long postId) {
         return  this.remove(new QueryWrapper<UserMessage>()
                 .eq("post_id", postId));
+    }
+
+    public void updateMessageStatusByIds(List<Long> ids){
+        if (CollectionUtil.isEmpty(ids)){
+            return;
+        }
+        userMessageMapper.updateMessageStatusByIds(new QueryWrapper<UserMessage>()
+                .in("id", ids)
+        );
     }
 }

@@ -45,4 +45,7 @@ public interface PostService extends IService<Post> {
 
     //点赞评论
     Boolean increasePostCommentLike(Long id, Boolean ok);
+
+    //删除评论
+    Long deleteComment(Long id, Long userId);
 }

@@ -204,12 +204,14 @@ layui.define('fly', function(exports){
       });
     }
     ,del: function(li){ //删除
+
       layer.confirm('确认删除该回答么？', function(index){
         layer.close(index);
-        fly.json('/api/jieda-delete/', {
+        fly.json('/post/comment-delete/', {
           id: li.data('id')
         }, function(res){
           if(res.status === 0){
+            console.log(res);
             var count = dom.jiedaCount.text()|0;
             dom.jiedaCount.html(--count);
             li.remove();
@@ -217,6 +219,7 @@ layui.define('fly', function(exports){
             if(li.hasClass('jieda-daan')){
               $('.jie-status').removeClass('jie-status-ok').text('求解中');
             }
+            location.href = res.action;
           } else {
             layer.msg(res.msg);
           }

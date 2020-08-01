@@ -7,11 +7,10 @@ import cn.hutool.core.map.MapUtil;
 import com.alex.common.Constant;
 import com.alex.entity.Comment;
 import com.alex.entity.Post;
+import com.alex.entity.User;
+import com.alex.entity.UserMessage;
 import com.alex.mapper.PostMapper;
-import com.alex.service.CommentService;
-import com.alex.service.PostService;
-import com.alex.service.UserCollectionService;
-import com.alex.service.UserMessageService;
+import com.alex.service.*;
 import com.alex.util.RedisUtil;
 import com.alex.vo.PostVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -51,6 +50,12 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
     @Autowired
     private UserMessageService userMessageService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private WebSocketService webSocketService;
 
     @Override
     public IPage<PostVO> getPostByPage(Page page, Long categoryId, Long userId, Integer level, Boolean recommend, String order) {
@@ -276,6 +281,45 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
         //本周热议板块的评论的更新
         this.increaseCommentCountAndUnionForRank(postId, true);
+
+        //通知作者，有人评论你的文章
+        //除了用户自己的评论不需要去发送消息
+        if(!comment.getUserId().equals(post.getUserId())){
+            UserMessage userMessage = new UserMessage();
+            userMessage.setFrouserId(userId);
+            userMessage.setPostId(postId);
+            userMessage.setCommentId(comment.getId());
+            userMessage.setToUserId(post.getUserId());
+            userMessage.setContent(content);
+            userMessage.setType(1);
+            userMessage.setCreated(new Date());
+            userMessage.setModified(new Date());
+            userMessage.setStatus(0);
+            userMessageService.save(userMessage);
+
+            //利用websocket即时通知用户
+            webSocketService.sendMessageToUser(userMessage.getToUserId());
+        }
+
+        //如果回复别人的评论, 需要对content进行截取
+        if(content.startsWith("@")){
+            String username = content.substring(1, content.indexOf(' '));
+            System.out.println(username);
+            User user = userService.getUserByUsername(username);
+            if(user != null){
+                UserMessage userMessage = new UserMessage();
+                userMessage.setFrouserId(userId);
+                userMessage.setPostId(postId);
+                userMessage.setCommentId(comment.getId());
+                userMessage.setToUserId(user.getId());
+                userMessage.setContent(content);
+                userMessage.setType(2);
+                userMessage.setCreated(new Date());
+                userMessage.setModified(new Date());
+                userMessage.setStatus(0);
+                userMessageService.save(userMessage);
+            }
+        }
     }
 
     @Override
@@ -287,8 +331,31 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         if(ok){
             comment.setVoteUp(comment.getVoteUp() + 1);
         }
-        commentService.save(comment);
+        commentService.updateById(comment);
         return true;
+    }
+
+    @Override
+    @Transactional
+    public Long deleteComment(Long id, Long userId) {
+        if(id == null){
+            return null;
+        }
+        Comment comment = commentService.getById(id);
+        Long postId = comment.getPostId();
+        Post post = this.getById(postId);
+        //只有博客的作者才能够删除评论
+        if(!post.getUserId().equals(userId)){
+            return null;
+        }
+        commentService.removeById(id);
+
+        post.setCommentCount(post.getCommentCount() - 1);
+        this.updateById(post);
+
+        //本周热议评论减1
+        this.increaseCommentCountAndUnionForRank(postId, false);
+        return postId;
     }
 
     /**

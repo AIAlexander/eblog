@@ -25,4 +25,6 @@ public interface UserService extends IService<User> {
     Result setInfo(Long id, UserVO userVO);
 
     Result repass(String nowpass, String pass, Long userId);
+
+    User getUserByUsername(String username);
 }

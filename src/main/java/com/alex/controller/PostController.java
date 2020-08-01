@@ -112,6 +112,17 @@ public class PostController extends BaseController{
         }
     }
 
+    @PostMapping("/post/comment-delete")
+    @ResponseBody
+    public Result deleteComment(Long id){
+        Long postId = postService.deleteComment(id, getProfileId());
+        if (postId != null){
+            return Result.success().action("/post/" + postId);
+        }else{
+            return Result.fail("删除失败！");
+        }
+    }
+
 
     /**
      * 判断用户是否收藏文章
